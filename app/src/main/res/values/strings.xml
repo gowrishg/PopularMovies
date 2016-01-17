@@ -13,5 +13,6 @@
     <string name="capstone">Capstone</string>
 
     <string name="button_click_toast">This button will launch %s</string>
+    <string name="title_activity_popular_movies">PopularMovies</string>
 
 </resources>
