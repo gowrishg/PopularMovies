@@ -24,6 +24,8 @@
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_sort_order">Sort Order</string>
+    <string name="pref_title_sort_order_summary">Sets the sort order for movies</string>
+
     <string-array name="pref_sort_order_list_titles">
         <item>Most Popular</item>
         <item>Highest-rated</item>

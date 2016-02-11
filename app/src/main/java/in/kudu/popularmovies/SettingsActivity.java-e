@@ -156,6 +156,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
+        bindPreferenceSummaryToValue(findPreference("sort_order_list"));
     }
 
     /**
@@ -163,7 +164,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @Override
     public boolean onIsMultiPane() {
-        return isXLargeTablet(this) && !isSimplePreferences(this);
+        return isXLargeTablet(this);
     }
 
     /**
