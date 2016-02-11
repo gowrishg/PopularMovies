@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:unified="http://schemas.android.com/apk/res-auto">
+
+    <header
+        unified:fragment="in.kudu.popularmovies.SettingsActivity$GeneralPreferenceFragment"
+        unified:preferenceRes="@xml/pref_general"
+        unified:title="@string/pref_header_general" />
+
+</PreferenceScreen>
