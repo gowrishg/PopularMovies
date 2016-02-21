@@ -3,6 +3,7 @@ package in.kudu.popularmovies;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -13,6 +14,7 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -161,6 +163,10 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         progressBar.setVisibility(View.GONE);
         actionBar.setVisibility(View.VISIBLE);
         playTrailerButton.setSelected(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+            videosViewer.setAlpha(0.0f);
+            videosViewer.animate().translationX(0).alpha(1.0f);
+        }
     }
 
     @OnItemClick(R.id.videos_viewer)
