@@ -40,5 +40,8 @@
     <string name="title_activity_movie_detail">Movie Detail</string>
     <string name="no_data">No Data Available</string>
     <string name="empty_string"></string>
+    <string name="unable_to_play">Unable to play the Trailer. Please try again.</string>
+    <string name="added_to_fav">Added to Favourites</string>
+    <string name="removed_from_fav">Removed from Favourites</string>
 
 </resources>

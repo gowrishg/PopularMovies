@@ -8,24 +8,66 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
             android:orientation="vertical"
             tools:context="in.kudu.popularmovies.MovieDetailActivityFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             tools:showIn="@layout/activity_movie_detail">
 
-            <ImageView
-                android:id="@+id/image_view_poster"
+            <FrameLayout
+                android:id="@+id/banner_layout"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:background="#000000"
-                android:scaleType="centerCrop" />
+                android:layout_height="200dp">
+
+                <ImageView
+                    android:id="@+id/image_view_poster"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#000000"
+                    android:scaleType="centerCrop" />
+
+                <LinearLayout
+                    android:id="@+id/action_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageButton
+                        android:id="@+id/play_trailer_button"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:background="@color/transparent"
+                        android:src="@drawable/ic_play_circle_outline_48dp" />
+
+                    <!--android:background="@drawable/ic_image_button"-->
+
+                    <ImageButton
+                        android:id="@+id/fav_button"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:background="@color/transparent"
+                        android:src="@drawable/ic_fav_button" />
+                    <!--android:background="@drawable/ic_image_button"-->
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    style="?android:attr/progressBarStyleSmallInverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/image_view_poster"
                 android:paddingLeft="16dp"
                 android:paddingTop="16dp" />
 
@@ -33,14 +75,12 @@
                 android:id="@+id/release_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/title"
                 android:paddingLeft="16dp" />
 
             <TextView
                 android:id="@+id/rating"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/release_date"
                 android:paddingLeft="16dp" />
 
 
@@ -48,8 +88,13 @@
                 android:id="@+id/overview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/rating"
                 android:paddingLeft="16dp" />
+
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/rating_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
 
         </LinearLayout>
     </ScrollView>

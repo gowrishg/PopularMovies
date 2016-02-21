@@ -6,6 +6,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -16,8 +18,15 @@ import com.google.gson.Gson;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.kudu.udacity.R;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MovieDetailActivity extends AppCompatActivity {
+
+    private MovieData movieData;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
 
@@ -33,12 +42,13 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         String movieDataJson = getIntent().getStringExtra("MOVIE_DATA");
         Gson gson = new Gson();
-        MovieData movieData = gson.fromJson(movieDataJson, MovieData.class);
+        movieData = gson.fromJson(movieDataJson, MovieData.class);
         getSupportActionBar().setTitle(movieData.originalTitle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         movieDetailActivityFragment.setMovieData(movieData);
         movieDetailActivityFragment.reInitUi();
+
     }
 
     @Override

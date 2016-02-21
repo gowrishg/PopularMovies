@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/review_info"
+        android:text="faksdlf jsdkl jfasd;kl fjds;f jsd;fj ds;ajf ;dsjf ;dsjf;dsj f;dsj f;dslaj f;dsjfkldsfjds lkjfdslj dlskjfdslkjf dslkj fdslk jfdskl jfdslk fdsljk fdskljf klds fjsdklfjksldfj"
+        android:maxLines="4"
+        android:ellipsize="end"
+        android:padding="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

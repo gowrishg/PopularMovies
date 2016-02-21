@@ -52,4 +52,13 @@ public class MovieData {
     @Expose
     public Double voteAverage;
 
+    public boolean isFav;
+
+    public void addToFav() {
+        isFav = true;
+    }
+
+    public void removeFromFav() {
+        isFav = false;
+    }
 }

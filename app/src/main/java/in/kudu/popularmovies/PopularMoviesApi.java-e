@@ -2,6 +2,7 @@ package in.kudu.popularmovies;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -14,5 +15,11 @@ public class PopularMoviesApi {
     public interface PopuplarMoviesService {
         @GET("3/discover/movie?api_key=62caadc143765775d2a887268d379db0")
         Call<MoviesData> movieList(@Query("sort_by") String sort);
+
+        @GET("3/movie/{id}/videos?api_key=62caadc143765775d2a887268d379db0")
+        Call<VideosData> trailerList(@Path("id") int id);
+
+        @GET("3/movie/{id}/reviews?api_key=62caadc143765775d2a887268d379db0")
+        Call<ReviewsData> review(@Path("id") int id);
     }
 }
