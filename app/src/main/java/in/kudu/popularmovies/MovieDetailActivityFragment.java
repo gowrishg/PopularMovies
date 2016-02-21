@@ -1,13 +1,20 @@
 package in.kudu.popularmovies;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.StyleSpan;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,22 +46,14 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @Bind(R.id.image_view_poster)
     ImageView imageViewPoster;
-    @Bind(R.id.rating)
-    TextView rating;
-    @Bind(R.id.title)
-    TextView title;
-    @Bind(R.id.overview)
-    TextView overview;
-    @Bind(R.id.release_date)
-    TextView releaseDate;
-    @Bind(R.id.play_trailer_button)
-    ImageButton playTrailerButton;
     @Bind(R.id.progress_bar)
     ProgressBar progressBar;
-    @Bind(R.id.action_button)
-    LinearLayout actionBar;
     @Bind(R.id.fav_button)
     ImageButton favButton;
+    @Bind(R.id.play_trailer_button)
+    ImageButton playTrailerButton;
+    @Bind(R.id.action_button)
+    LinearLayout actionBar;
 
     @Bind(R.id.reviews_viewer)
     ListView reviewsViewer;
@@ -62,6 +61,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     private MovieData movieData;
     TextView headerView;
+    MovieDetailLayout movieDetailLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,14 +85,15 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     public void reInitUi() {
         Picasso.with(getContext()).load("http://image.tmdb.org/t/p/w185/" + movieData.posterPath).into(imageViewPoster);
-        title.setText(Html.fromHtml("<b>Title: </b>" + movieData.title));
-        rating.setText(Html.fromHtml("<b>User Rating: </b>" + movieData.voteAverage));
-        releaseDate.setText(Html.fromHtml("<b>Release Date: </b>" + movieData.releaseDate));
-        overview.setText(Html.fromHtml("<b>Plot: </b>" + movieData.overview));
+
+        movieDetailLayout = new MovieDetailLayout(this.getActivity());
+        movieDetailLayout.reInitUi(movieData);
 
         headerView = new TextView(getActivity());
-        headerView.setText(R.string.review_title);
+        headerView.setText(R.string.reviews_title);
         headerView.setTypeface(Typeface.DEFAULT_BOLD);
+
+        reviewsViewer.addHeaderView(movieDetailLayout, null, false);
 
         loadReviews();
     }
@@ -154,24 +155,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     private void loadReviews() {
 
-        if(false) {
-            ReviewsData mReviewsData = new ReviewsData();
-            ReviewData reviewData = new ReviewData();
-            reviewData.content = "dfas faf ads fs fa fasd fads fas fas fsdfasd";
-            reviewData.author = "chris-chris";
-            mReviewsData.results.add(reviewData);
-
-            reviewData = new ReviewData();
-            reviewData.content = "12321 312 3214 124 12412 412 412 4124 12490128490 124091824 09128409 12048";
-            reviewData.author = "jone=jone";
-            mReviewsData.results.add(reviewData);
-
-            reviewAdapter.setReviewsData(mReviewsData);
-            reviewAdapter.notifyDataSetChanged();
-            return;
-        }
-
-        removeHeaderForListView();
+        reviewsViewer.removeHeaderView(headerView);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(PopularMoviesApi.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -181,36 +165,91 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         reviews.enqueue(new Callback<ReviewsData>() {
             @Override
             public void onResponse(Call<ReviewsData> call, Response<ReviewsData> response) {
-                addHeaderForListView();
+                ReviewsData reviewsData = response.body();
+                if(reviewsData == null || reviewsData.results == null ||  reviewsData.results.size() == 0) {
+                    reviewsViewer.removeHeaderView(headerView);
+                } else {
+                    reviewsViewer.addHeaderView(headerView, null, false);
+                }
                 reviewAdapter.setReviewsData(response.body());
                 reviewAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Call<ReviewsData> call, Throwable throwable) {
+                reviewsViewer.removeHeaderView(headerView);
             }
         });
     }
 
-    private void addHeaderForListView() {
-        if(reviewsViewer.getHeaderViewsCount() > 0) return;
-        reviewsViewer.addHeaderView(headerView);
-    }
-
-    private void removeHeaderForListView() {
-        if(reviewsViewer.getHeaderViewsCount() == 0) return;
-        reviewsViewer.removeHeaderView(headerView);
-    }
-
     @OnItemClick(R.id.reviews_viewer)
-    void selectedReview(int position) {
-        ReviewData reviewData = (ReviewData) reviewAdapter.getItem(position - 1);
+    void readFullReview(int position) {
+        ReviewData reviewData = (ReviewData) reviewAdapter.getItem(position - reviewsViewer.getHeaderViewsCount());
         final AlertDialog.Builder alertDialog;
         alertDialog = new AlertDialog.Builder(this.getActivity());
         alertDialog.setTitle(R.string.review_title);
-        alertDialog.setMessage("" + reviewData.content);
+
+        String review = String.format(getString(R.string.review_template), new String[]{reviewData.author});
+        SpannableString span1 = new SpannableString(review);
+        span1.setSpan(new StyleSpan(android.graphics.Typeface.BOLD_ITALIC), 0, span1.length(), 0);
+        SpannableString span2 = new SpannableString(reviewData.content);
+        alertDialog.setMessage(TextUtils.concat(span1, " ", span2));
+
         alertDialog.setPositiveButton(R.string.close, null);
         alertDialog.show();
     }
 
+    class MovieDetailLayout extends LinearLayout {
+
+        @Bind(R.id.rating)
+        TextView rating;
+        @Bind(R.id.title)
+        TextView title;
+        @Bind(R.id.overview)
+        TextView overview;
+        @Bind(R.id.release_date)
+        TextView releaseDate;
+
+        Context mContext;
+
+        public MovieDetailLayout(Context context) {
+            super(context);
+            mContext = context;
+            init();
+        }
+
+        private void init() {
+            View view = LayoutInflater.from(getContext()).inflate(
+                    R.layout.movie_detail_layout, null);
+            ButterKnife.bind(this, view);
+            this.addView(view);
+        }
+
+        public void reInitUi(MovieData movieData) {
+            title.setText(Html.fromHtml("<b>Title: </b>" + movieData.title));
+            rating.setText(Html.fromHtml("<b>User Rating: </b>" + movieData.voteAverage));
+            releaseDate.setText(Html.fromHtml("<b>Release Date: </b>" + movieData.releaseDate));
+            overview.setText(Html.fromHtml("<b>Plot: </b>" + movieData.overview));
+        }
+
+        public MovieDetailLayout(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            mContext = context;
+            init();
+        }
+
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+        public MovieDetailLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+            mContext = context;
+            init();
+        }
+
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+        public MovieDetailLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+            mContext = context;
+            init();
+        }
+    }
 }
