@@ -17,12 +17,12 @@ import in.kudu.udacity.R;
 /**
  * Created by gowrishg on 22/2/16.
  */
-class ReviewAdapter extends BaseAdapter {
+class ReviewsAdapter extends BaseAdapter {
 
     Context mContext;
     private ReviewsData mReviewsData;
 
-    ReviewAdapter(Context context) {
+    ReviewsAdapter(Context context) {
         mContext = context;
     }
 
@@ -45,7 +45,7 @@ class ReviewAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.ratings_layout, null, false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.rating_item_layout, null, false);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {

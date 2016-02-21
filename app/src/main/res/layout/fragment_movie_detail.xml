@@ -7,11 +7,15 @@
     tools:showIn="@layout/activity_movie_detail">
 
     <FrameLayout
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
         android:id="@+id/banner_layout"
         android:layout_width="match_parent"
         android:layout_height="200dp">
 
         <ImageView
+            android:paddingRight="80dp"
             android:id="@+id/image_view_poster"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -19,25 +23,28 @@
             android:scaleType="centerCrop" />
 
         <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_gravity="right|center_vertical"
             android:id="@+id/action_button"
-            android:layout_width="match_parent"
+            android:layout_marginRight="16dp"
+            android:orientation="vertical"
             android:layout_height="match_parent">
 
             <ImageButton
                 android:id="@+id/play_trailer_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@color/transparent"
-                android:src="@drawable/ic_play_circle_outline_48dp" />
+                android:src="@drawable/ic_trailer_button" />
 
             <!--android:background="@drawable/ic_image_button"-->
 
             <ImageButton
                 android:id="@+id/fav_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@color/transparent"
@@ -47,15 +54,25 @@
         </LinearLayout>
 
         <ProgressBar
+            style="?android:attr/progressBarStyleLargeInverse"
             android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleSmallInverse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="16dp"
+            android:visibility="gone" />
+
+
+        <ListView
+            android:id="@+id/videos_viewer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="80dp"
+            android:background="#000000"
+            android:scrollbars="none"
             android:visibility="gone" />
 
     </FrameLayout>
-
 
     <ListView
         android:padding="16dp"

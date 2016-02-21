@@ -1,23 +1,19 @@
 package in.kudu.popularmovies;
 
-import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.Html;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -57,11 +53,17 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @Bind(R.id.reviews_viewer)
     ListView reviewsViewer;
-    private ReviewAdapter reviewAdapter;
+    private ReviewsAdapter reviewsAdapter;
+
+    @Bind(R.id.videos_viewer)
+    ListView videosViewer;
+    private VideosAdapter videosAdapter;
 
     private MovieData movieData;
     TextView headerView;
     MovieDetailLayout movieDetailLayout;
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -79,8 +81,11 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        reviewAdapter = new ReviewAdapter(getActivity());
-        reviewsViewer.setAdapter(reviewAdapter);
+        reviewsAdapter = new ReviewsAdapter(getActivity());
+        reviewsViewer.setAdapter(reviewsAdapter);
+
+        videosAdapter = new VideosAdapter(getActivity());
+        videosViewer.setAdapter(videosAdapter);
     }
 
     public void reInitUi() {
@@ -104,15 +109,21 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @OnClick(R.id.play_trailer_button)
     void playTrailer() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(PopularMoviesApi.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
-        Call<VideosData> result = popuplarMoviesService.trailerList(movieData.id);
-        result.enqueue(this);
-        progressBar.setVisibility(View.VISIBLE);
-        actionBar.setVisibility(View.GONE);
+        if (playTrailerButton.isSelected()) {
+            playTrailerButton.setSelected(false);
+            videosViewer.setVisibility(View.GONE);
+        } else {
+            playTrailerButton.setSelected(true);
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(PopularMoviesApi.BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
+            Call<VideosData> result = popuplarMoviesService.trailerList(movieData.id);
+            result.enqueue(this);
+            progressBar.setVisibility(View.VISIBLE);
+            actionBar.setVisibility(View.GONE);
+        }
     }
 
     @OnClick(R.id.fav_button)
@@ -134,21 +145,41 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @Override
     public void onResponse(Call<VideosData> call, Response<VideosData> response) {
-        VideoData videoData = response.body().results.get(0);
+        VideosData videosData = response.body();
+        if(videosData == null || videosData.results == null || videosData.results.size() == 0) {
+            videosViewer.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+            actionBar.setVisibility(View.VISIBLE);
+            Snackbar.make(actionBar, R.string.unable_to_play, Snackbar.LENGTH_SHORT).show();
+            playTrailerButton.setSelected(false);
+        }
+
+        videosAdapter.setReviewsData(videosData);
+        videosAdapter.notifyDataSetChanged();
+
+        videosViewer.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+        actionBar.setVisibility(View.VISIBLE);
+        playTrailerButton.setSelected(true);
+    }
+
+    @OnItemClick(R.id.videos_viewer)
+    void viewVideo(int position) {
+        VideoData videoData = (VideoData) videosAdapter.getItem(position - videosViewer.getHeaderViewsCount());
         if (videoData.site.equalsIgnoreCase("YouTube")) {
             Uri uri = Uri.parse("http://www.youtube.com/watch").buildUpon().appendQueryParameter("v", videoData.key).build();
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            //    startActivity(intent);
+            startActivity(intent);
         }
-        progressBar.setVisibility(View.GONE);
-        actionBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onFailure(Call<VideosData> call, Throwable throwable) {
+        videosViewer.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
         actionBar.setVisibility(View.VISIBLE);
         Snackbar.make(actionBar, R.string.unable_to_play, Snackbar.LENGTH_SHORT).show();
+        playTrailerButton.setSelected(false);
     }
 
 
@@ -171,8 +202,8 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
                 } else {
                     reviewsViewer.addHeaderView(headerView, null, false);
                 }
-                reviewAdapter.setReviewsData(response.body());
-                reviewAdapter.notifyDataSetChanged();
+                reviewsAdapter.setReviewsData(response.body());
+                reviewsAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -184,7 +215,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @OnItemClick(R.id.reviews_viewer)
     void readFullReview(int position) {
-        ReviewData reviewData = (ReviewData) reviewAdapter.getItem(position - reviewsViewer.getHeaderViewsCount());
+        ReviewData reviewData = (ReviewData) reviewsAdapter.getItem(position - reviewsViewer.getHeaderViewsCount());
         final AlertDialog.Builder alertDialog;
         alertDialog = new AlertDialog.Builder(this.getActivity());
         alertDialog.setTitle(R.string.review_title);

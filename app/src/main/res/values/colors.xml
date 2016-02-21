@@ -7,4 +7,6 @@
     <color name="button_bg_pressed">#5098afe5</color>
 
     <color name="transparent">#00000000</color>
+
+    <color name="half_white">#77ffffff</color>
 </resources>

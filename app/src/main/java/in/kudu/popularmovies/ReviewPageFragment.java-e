@@ -25,7 +25,7 @@ public class ReviewPageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup) inflater.inflate(
-                R.layout.ratings_layout, container, false);
+                R.layout.rating_item_layout, container, false);
         ButterKnife.bind(this, rootView);
         return rootView;
     }
