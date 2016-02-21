@@ -1,14 +1,12 @@
 package in.kudu.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -24,6 +23,7 @@ import com.squareup.picasso.Picasso;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnItemClick;
 import in.kudu.udacity.R;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,11 +56,12 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
     @Bind(R.id.fav_button)
     ImageButton favButton;
 
-    @Bind(R.id.rating_viewpager)
-    ViewPager ratingViewPager;
+    @Bind(R.id.reviews_viewer)
+    ListView reviewsViewer;
     private ReviewAdapter reviewAdapter;
 
     private MovieData movieData;
+    TextView headerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,11 +74,13 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        reviewAdapter = new ReviewAdapter(getActivity().getSupportFragmentManager());
-        ratingViewPager.setAdapter(reviewAdapter);
-
-        loadReviews();
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        reviewAdapter = new ReviewAdapter(getActivity());
+        reviewsViewer.setAdapter(reviewAdapter);
     }
 
     public void reInitUi() {
@@ -86,6 +89,12 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         rating.setText(Html.fromHtml("<b>User Rating: </b>" + movieData.voteAverage));
         releaseDate.setText(Html.fromHtml("<b>Release Date: </b>" + movieData.releaseDate));
         overview.setText(Html.fromHtml("<b>Plot: </b>" + movieData.overview));
+
+        headerView = new TextView(getActivity());
+        headerView.setText(R.string.review_title);
+        headerView.setTypeface(Typeface.DEFAULT_BOLD);
+
+        loadReviews();
     }
 
     public void setMovieData(MovieData movieData) {
@@ -144,22 +153,25 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
 
     private void loadReviews() {
-        ReviewsData mReviewsData = new ReviewsData();
-        ReviewData reviewData = new ReviewData();
-        reviewData.content = "dfas faf ads fs fa fasd fads fas fas fsdfasd";
-        reviewData.author = "chris-chris";
-        mReviewsData.results.add(reviewData);
 
-        reviewData = new ReviewData();
-        reviewData.content = "12321 312 3214 124 12412 412 412 4124 12490128490 124091824 09128409 12048";
-        reviewData.author = "jone=jone";
-        mReviewsData.results.add(reviewData);
+        if(false) {
+            ReviewsData mReviewsData = new ReviewsData();
+            ReviewData reviewData = new ReviewData();
+            reviewData.content = "dfas faf ads fs fa fasd fads fas fas fsdfasd";
+            reviewData.author = "chris-chris";
+            mReviewsData.results.add(reviewData);
 
-        reviewAdapter.setReviewsData(mReviewsData);
-        reviewAdapter.notifyDataSetChanged();
+            reviewData = new ReviewData();
+            reviewData.content = "12321 312 3214 124 12412 412 412 4124 12490128490 124091824 09128409 12048";
+            reviewData.author = "jone=jone";
+            mReviewsData.results.add(reviewData);
 
-        if(true) return;
+            reviewAdapter.setReviewsData(mReviewsData);
+            reviewAdapter.notifyDataSetChanged();
+            return;
+        }
 
+        removeHeaderForListView();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(PopularMoviesApi.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -169,39 +181,36 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         reviews.enqueue(new Callback<ReviewsData>() {
             @Override
             public void onResponse(Call<ReviewsData> call, Response<ReviewsData> response) {
+                addHeaderForListView();
                 reviewAdapter.setReviewsData(response.body());
                 reviewAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Call<ReviewsData> call, Throwable throwable) {
-
             }
         });
     }
 
-    class ReviewAdapter extends FragmentStatePagerAdapter {
-
-        private ReviewsData mReviewsData;
-
-        ReviewAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public int getCount() {
-            return 10;// (mReviewsData == null || mReviewsData.results == null) ? 0 : mReviewsData.results.size();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            ReviewPageFragment reviewPageFragment = new ReviewPageFragment();
-            //reviewPageFragment.setReviewData(mReviewsData.results.get(position));
-            return reviewPageFragment;
-        }
-
-        public void setReviewsData(ReviewsData reviewsData) {
-            mReviewsData = reviewsData;
-        }
+    private void addHeaderForListView() {
+        if(reviewsViewer.getHeaderViewsCount() > 0) return;
+        reviewsViewer.addHeaderView(headerView);
     }
+
+    private void removeHeaderForListView() {
+        if(reviewsViewer.getHeaderViewsCount() == 0) return;
+        reviewsViewer.removeHeaderView(headerView);
+    }
+
+    @OnItemClick(R.id.reviews_viewer)
+    void selectedReview(int position) {
+        ReviewData reviewData = (ReviewData) reviewAdapter.getItem(position - 1);
+        final AlertDialog.Builder alertDialog;
+        alertDialog = new AlertDialog.Builder(this.getActivity());
+        alertDialog.setTitle(R.string.review_title);
+        alertDialog.setMessage("" + reviewData.content);
+        alertDialog.setPositiveButton(R.string.close, null);
+        alertDialog.show();
+    }
+
 }
