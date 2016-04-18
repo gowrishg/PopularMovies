@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -45,6 +46,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     @Bind(R.id.grid_view_movie_posters) GridView mMoviePostersGridView;
     @Bind(R.id.progress_bar) ProgressBar mProgressBar;
     @Bind(R.id.empty_list_item) TextView emptyListItem;
+    @Nullable @Bind(R.id.fragment) FrameLayout fragment;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
@@ -60,10 +62,6 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         setContentView(R.layout.activity_popular_movies);
         ButterKnife.bind(this);
 
-        FragmentManager fragManager = getSupportFragmentManager();
-        MovieDetailActivityFragment movieDetailActivityFragment = (MovieDetailActivityFragment) fragManager.findFragmentById(R.id.fragment);
-        mTwoPane = !(movieDetailActivityFragment == null);
-
         moviesGridViewAdapter = new MoviesGridViewAdapter(this);
         mMoviePostersGridView.setAdapter(moviesGridViewAdapter);
         mMoviePostersGridView.setEmptyView(emptyListItem);
@@ -72,6 +70,8 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     @Override
     protected void onResume() {
         super.onResume();
+
+        mTwoPane = !(fragment == null);
 
         String sortOrder = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
 
@@ -86,7 +86,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             mProgressBar.setVisibility(View.GONE);
             emptyListItem.setText(R.string.no_data);
 
-            //showDetailsIfTwoPanelsPresent(moviesData);
+            showDetailsIfTwoPanelsPresent(moviesData);
         } else {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(PopularMoviesApi.BASE_URL)
@@ -107,9 +107,12 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
                 fragManager.popBackStack();
             } else {
                 MovieDetailActivityFragment movieDetailActivityFragment = new MovieDetailActivityFragment();
-                fragManager.beginTransaction().add(movieDetailActivityFragment, MOVIE_DETAILS_TAG).commit();
-                movieDetailActivityFragment.setMovieData(movieData);
-                movieDetailActivityFragment.reInitUi();
+                Bundle bundle = new Bundle();
+                bundle.putString("MOVIE_DATA", new Gson().toJson(movieData));
+                movieDetailActivityFragment.setArguments(bundle);
+                fragManager.beginTransaction().replace(R.id.fragment, movieDetailActivityFragment, MOVIE_DETAILS_TAG).commit();
+                //movieDetailActivityFragment.setMovieData(movieData);
+                //movieDetailActivityFragment.reInitUi();
             }
         }
     }

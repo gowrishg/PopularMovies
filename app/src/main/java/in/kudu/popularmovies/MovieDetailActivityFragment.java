@@ -24,6 +24,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
@@ -89,9 +90,17 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
         videosAdapter = new VideosAdapter(getActivity());
         videosViewer.setAdapter(videosAdapter);
+
+        String movieDataJson = getArguments().getString("MOVIE_DATA");
+        Gson gson = new Gson();
+        movieData = gson.fromJson(movieDataJson, MovieData.class);
+
+        reInitUi();
     }
 
-    public void reInitUi() {
+    private void reInitUi() {
+        if(movieData == null) return;
+
         Picasso.with(getContext()).load("http://image.tmdb.org/t/p/w185/" + movieData.posterPath).into(imageViewPoster);
 
         movieDetailLayout = new MovieDetailLayout(this.getActivity());

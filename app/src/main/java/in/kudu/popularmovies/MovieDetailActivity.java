@@ -26,6 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
+    private static final String MOVIE_DETAILS_TAG = "MOVIE_DETAILS_TAG";
     private MovieData movieData;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
@@ -44,10 +45,13 @@ public class MovieDetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         FragmentManager fragManager = getSupportFragmentManager();
-        MovieDetailActivityFragment movieDetailActivityFragment = (MovieDetailActivityFragment) fragManager.findFragmentById(R.id.fragment);
-        movieDetailActivityFragment.setMovieData(movieData);
-        movieDetailActivityFragment.reInitUi();
-
+        MovieDetailActivityFragment movieDetailActivityFragment = new MovieDetailActivityFragment(); //(MovieDetailActivityFragment) fragManager.findFragmentById(R.id.fragment);
+        Bundle bundle = new Bundle();
+        bundle.putString("MOVIE_DATA", movieDataJson);
+        movieDetailActivityFragment.setArguments(bundle);
+        //movieDetailActivityFragment.setMovieData(movieData);
+        fragManager.beginTransaction().replace(R.id.fragment, movieDetailActivityFragment, MOVIE_DETAILS_TAG).commit();
+        //movieDetailActivityFragment.reInitUi();
     }
 
     @Override
