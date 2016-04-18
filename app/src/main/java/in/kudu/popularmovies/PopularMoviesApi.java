@@ -13,8 +13,8 @@ public class PopularMoviesApi {
     public static final String BASE_URL = "https://api.themoviedb.org";
     public static final String SORT_BY_POPULARITY_DESC = "popularity.desc";
     public interface PopuplarMoviesService {
-        @GET("3/discover/movie?api_key=")
-        Call<MoviesData> movieList(@Query("sort_by") String sort);
+        @GET("3/movie/{sort_by}?api_key=")
+        Call<MoviesData> movieList(@Path("sort_by") String sort);
 
         @GET("3/movie/{id}/videos?api_key=")
         Call<VideosData> trailerList(@Path("id") int id);
