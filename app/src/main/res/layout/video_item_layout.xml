@@ -3,18 +3,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageButton
+        android:id="@+id/share_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:background="@android:color/black"
+        android:gravity="center_vertical"
+        android:layout_centerVertical="true"
+        android:padding="4dp"
+        android:src="@drawable/ic_share_24dp" />
+
     <TextView
         android:id="@+id/video_info"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_toRightOf="@+id/share_video"
         android:drawableLeft="@drawable/ic_play_arrow_48dp"
         android:drawableStart="@drawable/ic_play_arrow_48dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
+        android:paddingBottom="4dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="4dp"
-        android:paddingBottom="4dp"
         android:singleLine="true"
         android:textColor="@color/half_white" />
 

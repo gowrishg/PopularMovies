@@ -169,16 +169,6 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         }
     }
 
-    @OnItemClick(R.id.videos_viewer)
-    void viewVideo(int position) {
-        VideoData videoData = (VideoData) videosAdapter.getItem(position - videosViewer.getHeaderViewsCount());
-        if (videoData.site.equalsIgnoreCase("YouTube")) {
-            Uri uri = Uri.parse("http://www.youtube.com/watch").buildUpon().appendQueryParameter("v", videoData.key).build();
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
-        }
-    }
-
     @Override
     public void onFailure(Call<VideosData> call, Throwable throwable) {
         videosViewer.setVisibility(View.GONE);
