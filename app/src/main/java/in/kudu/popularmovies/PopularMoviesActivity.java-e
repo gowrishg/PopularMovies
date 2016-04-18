@@ -3,6 +3,9 @@ package in.kudu.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,9 +39,17 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PopularMoviesActivity extends AppCompatActivity implements Callback<MoviesData> {
+
+    private static final String MOVIE_DETAILS_TAG = "MOVIE_DETAILS_TAG";
+
     @Bind(R.id.grid_view_movie_posters) GridView mMoviePostersGridView;
     @Bind(R.id.progress_bar) ProgressBar mProgressBar;
     @Bind(R.id.empty_list_item) TextView emptyListItem;
+
+    /**
+     * Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
+     */
+    private boolean mTwoPane;
 
     private static final String TAG = PopularMoviesActivity.class.getSimpleName();
     MoviesGridViewAdapter moviesGridViewAdapter;
@@ -48,6 +59,10 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_popular_movies);
         ButterKnife.bind(this);
+
+        FragmentManager fragManager = getSupportFragmentManager();
+        MovieDetailActivityFragment movieDetailActivityFragment = (MovieDetailActivityFragment) fragManager.findFragmentById(R.id.fragment);
+        mTwoPane = !(movieDetailActivityFragment == null);
 
         moviesGridViewAdapter = new MoviesGridViewAdapter(this);
         mMoviePostersGridView.setAdapter(moviesGridViewAdapter);
@@ -59,6 +74,8 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         super.onResume();
 
         String sortOrder = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
+
+        //! check for Fav
         if(sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
             MoviesDb moviesDb = new MoviesDb(getBaseContext());
             MoviesData moviesData = new MoviesData();
@@ -68,6 +85,8 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             moviesGridViewAdapter.notifyDataSetChanged();
             mProgressBar.setVisibility(View.GONE);
             emptyListItem.setText(R.string.no_data);
+
+            //showDetailsIfTwoPanelsPresent(moviesData);
         } else {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(PopularMoviesApi.BASE_URL)
@@ -78,6 +97,31 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             result.enqueue(this);
             mProgressBar.setVisibility(View.VISIBLE);
             emptyListItem.setText(R.string.empty_string);
+        }
+    }
+
+    private void showDetailsIfTwoPanelsPresent(MovieData movieData) {
+        if(mTwoPane) {
+            FragmentManager fragManager = getSupportFragmentManager();
+            if(movieData == null) {
+                fragManager.popBackStack();
+            } else {
+                MovieDetailActivityFragment movieDetailActivityFragment = new MovieDetailActivityFragment();
+                fragManager.beginTransaction().add(movieDetailActivityFragment, MOVIE_DETAILS_TAG).commit();
+                movieDetailActivityFragment.setMovieData(movieData);
+                movieDetailActivityFragment.reInitUi();
+            }
+        }
+    }
+
+    private void showDetailsIfTwoPanelsPresent(MoviesData moviesData) {
+        if(mTwoPane) {
+            FragmentManager fragManager = getSupportFragmentManager();
+            if(moviesData == null || moviesData.results == null || moviesData.results.size() == 0) {
+                fragManager.popBackStack();
+            } else {
+                showDetailsIfTwoPanelsPresent(moviesData.results.get(0));
+            }
         }
     }
 
@@ -113,6 +157,8 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         moviesGridViewAdapter.notifyDataSetChanged();
         mProgressBar.setVisibility(View.GONE);
         emptyListItem.setText(R.string.no_data);
+
+        showDetailsIfTwoPanelsPresent(response.body());
     }
 
     @Override
@@ -124,11 +170,16 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     @OnItemClick(R.id.grid_view_movie_posters)
     public void onMoviePosterSelected(int position) {
         MovieData movieData = (MovieData) moviesGridViewAdapter.getItem(position);
-        Gson gson = new Gson();
-        String movieDataStr = gson.toJson(movieData);
-        Intent intent = new Intent(this, MovieDetailActivity.class);
-        intent.putExtra("MOVIE_DATA", movieDataStr);
-        startActivity(intent);
+
+        if(mTwoPane) {
+            showDetailsIfTwoPanelsPresent(movieData);
+        } else {
+            Gson gson = new Gson();
+            String movieDataStr = gson.toJson(movieData);
+            Intent intent = new Intent(this, MovieDetailActivity.class);
+            intent.putExtra("MOVIE_DATA", movieDataStr);
+            startActivity(intent);
+        }
     }
 
     class MoviesGridViewAdapter extends BaseAdapter {

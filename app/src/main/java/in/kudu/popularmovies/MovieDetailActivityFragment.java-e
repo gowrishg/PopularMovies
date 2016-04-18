@@ -1,5 +1,6 @@
 package in.kudu.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -123,7 +124,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
-            Call<VideosData> result = popuplarMoviesService.trailerList(movieData.id);
+                Call<VideosData> result = popuplarMoviesService.trailerList(movieData.id);
             result.enqueue(this);
             progressBar.setVisibility(View.VISIBLE);
             actionBar.setVisibility(View.GONE);

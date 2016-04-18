@@ -37,15 +37,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        FragmentManager fragManager = getSupportFragmentManager();
-        MovieDetailActivityFragment movieDetailActivityFragment = (MovieDetailActivityFragment) fragManager.findFragmentById(R.id.fragment);
-
         String movieDataJson = getIntent().getStringExtra("MOVIE_DATA");
         Gson gson = new Gson();
         movieData = gson.fromJson(movieDataJson, MovieData.class);
         getSupportActionBar().setTitle(movieData.originalTitle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        FragmentManager fragManager = getSupportFragmentManager();
+        MovieDetailActivityFragment movieDetailActivityFragment = (MovieDetailActivityFragment) fragManager.findFragmentById(R.id.fragment);
         movieDetailActivityFragment.setMovieData(movieData);
         movieDetailActivityFragment.reInitUi();
 
