@@ -21,10 +21,13 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnItemClick;
 import butterknife.OnItemSelected;
+import in.kudu.popularmovies.db.MoviesDb;
 import in.kudu.udacity.R;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,16 +58,27 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     protected void onResume() {
         super.onResume();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(PopularMoviesApi.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
         String sortOrder = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
-        Call<MoviesData> result = popuplarMoviesService.movieList(sortOrder);
-        result.enqueue(this);
-        mProgressBar.setVisibility(View.VISIBLE);
-        emptyListItem.setText(R.string.empty_string);
+        if(sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
+            MoviesDb moviesDb = new MoviesDb(getBaseContext());
+            MoviesData moviesData = new MoviesData();
+            moviesData.results = moviesDb.getFavMovies();
+            moviesData.page = 0;
+            moviesGridViewAdapter.setMoviesData(moviesData);
+            moviesGridViewAdapter.notifyDataSetChanged();
+            mProgressBar.setVisibility(View.GONE);
+            emptyListItem.setText(R.string.no_data);
+        } else {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(PopularMoviesApi.BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
+            Call<MoviesData> result = popuplarMoviesService.movieList(sortOrder);
+            result.enqueue(this);
+            mProgressBar.setVisibility(View.VISIBLE);
+            emptyListItem.setText(R.string.empty_string);
+        }
     }
 
     @Override

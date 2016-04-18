@@ -102,6 +102,8 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
         reviewsViewer.addHeaderView(movieDetailLayout, null, false);
 
+        favButton.setSelected(movieData.isFav(getContext()));
+
         loadReviews();
     }
 
@@ -130,19 +132,17 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @OnClick(R.id.fav_button)
     void toggleFav() {
+        boolean isFav = movieData.isFav(getContext());
         //! toggle fav
-        if (movieData.isFav) {
-            movieData.removeFromFav();
+        if (isFav) {
+            movieData.removeFromFav(getContext());
+            Snackbar.make(actionBar, R.string.removed_from_fav, Snackbar.LENGTH_SHORT).show();
         } else {
-            movieData.addToFav();
+            movieData.addToFav(getContext());
+            Snackbar.make(actionBar, R.string.added_to_fav, Snackbar.LENGTH_SHORT).show();
         }
 
-        if (movieData.isFav) {
-            Snackbar.make(actionBar, R.string.added_to_fav, Snackbar.LENGTH_SHORT).show();
-        } else {
-            Snackbar.make(actionBar, R.string.removed_from_fav, Snackbar.LENGTH_SHORT).show();
-        }
-        favButton.setSelected(movieData.isFav);
+        favButton.setSelected(!isFav);
     }
 
     @Override

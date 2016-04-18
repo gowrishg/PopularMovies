@@ -1,11 +1,15 @@
 
 package in.kudu.popularmovies;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import in.kudu.popularmovies.db.MoviesDb;
 
 public class MovieData {
 
@@ -52,13 +56,24 @@ public class MovieData {
     @Expose
     public Double voteAverage;
 
-    public boolean isFav;
+    private boolean isFav;
 
-    public void addToFav() {
+    public boolean isFav(Context context) {
+        MoviesDb moviesDb = new MoviesDb(context);
+        isFav = moviesDb.isFav(this);
+        return isFav;
+    }
+
+    public void addToFav(Context context) {
+        MoviesDb moviesDb = new MoviesDb(context);
+        moviesDb.addToFav(this);
         isFav = true;
     }
 
-    public void removeFromFav() {
+
+    public void removeFromFav(Context context) {
+        MoviesDb moviesDb = new MoviesDb(context);
+        moviesDb.deleteFav(this);
         isFav = false;
     }
 }
