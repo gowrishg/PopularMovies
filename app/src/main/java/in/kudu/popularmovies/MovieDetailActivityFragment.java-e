@@ -1,9 +1,7 @@
 package in.kudu.popularmovies;
 
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -15,8 +13,6 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -112,9 +108,22 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
         reviewsViewer.addHeaderView(movieDetailLayout, null, false);
 
-        favButton.setSelected(movieData.isFav(getContext()));
+        new CheckForFav().execute(movieData);
 
         loadReviews();
+    }
+
+    class CheckForFav extends AsyncTask<MovieData, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(MovieData... params) {
+            return params[0].isFav(getContext());
+        }
+
+        @Override
+        protected void onPostExecute(Boolean status) {
+            favButton.setSelected(status);
+        }
     }
 
     public void setMovieData(MovieData movieData) {
@@ -142,17 +151,41 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
     @OnClick(R.id.fav_button)
     void toggleFav() {
-        boolean isFav = movieData.isFav(getContext());
-        //! toggle fav
-        if (isFav) {
-            movieData.removeFromFav(getContext());
-            Snackbar.make(actionBar, R.string.removed_from_fav, Snackbar.LENGTH_SHORT).show();
-        } else {
-            movieData.addToFav(getContext());
-            Snackbar.make(actionBar, R.string.added_to_fav, Snackbar.LENGTH_SHORT).show();
+        new ToggleFav().execute(movieData);
+    }
+
+    class ToggleFav extends AsyncTask<MovieData, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(MovieData... params) {
+            boolean isFav = movieData.isFav(getContext());
+
+            //! toggle fav
+            if (isFav) {
+                movieData.removeFromFav(getContext());
+            } else {
+                movieData.addToFav(getContext());
+            }
+
+            return !isFav;
         }
 
-        favButton.setSelected(!isFav);
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            favButton.setEnabled(false);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isFav) {
+            if(isFav) {
+                Snackbar.make(actionBar, R.string.added_to_fav, Snackbar.LENGTH_SHORT).show();
+            } else {
+                Snackbar.make(actionBar, R.string.removed_from_fav, Snackbar.LENGTH_SHORT).show();
+            }
+            favButton.setEnabled(true);
+            favButton.setSelected(isFav);
+        }
     }
 
     @Override

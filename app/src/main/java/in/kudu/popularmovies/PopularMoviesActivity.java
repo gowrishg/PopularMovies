@@ -2,6 +2,8 @@ package in.kudu.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Movie;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -77,16 +79,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
 
         //! check for Fav
         if(sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
-            MoviesDb moviesDb = new MoviesDb(getBaseContext());
-            MoviesData moviesData = new MoviesData();
-            moviesData.results = moviesDb.getFavMovies();
-            moviesData.page = 0;
-            moviesGridViewAdapter.setMoviesData(moviesData);
-            moviesGridViewAdapter.notifyDataSetChanged();
-            mProgressBar.setVisibility(View.GONE);
-            emptyListItem.setText(R.string.no_data);
-
-            showDetailsIfTwoPanelsPresent(moviesData);
+            new LoadFav().execute();
         } else {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(PopularMoviesApi.BASE_URL)
@@ -97,6 +90,34 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             result.enqueue(this);
             mProgressBar.setVisibility(View.VISIBLE);
             emptyListItem.setText(R.string.empty_string);
+        }
+    }
+
+    private class LoadFav extends AsyncTask<Void, Void, MoviesData> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressBar.setVisibility(View.VISIBLE);
+            emptyListItem.setText(R.string.empty_string);
+        }
+
+        @Override
+        protected MoviesData doInBackground(Void... params) {
+            MoviesDb moviesDb = new MoviesDb(getBaseContext());
+            MoviesData moviesData = new MoviesData();
+            moviesData.results = moviesDb.getFavMovies();
+            moviesData.page = 0;
+            return moviesData;
+        }
+
+        @Override
+        protected void onPostExecute(MoviesData moviesData) {
+            moviesGridViewAdapter.setMoviesData(moviesData);
+            moviesGridViewAdapter.notifyDataSetChanged();
+            mProgressBar.setVisibility(View.GONE);
+            emptyListItem.setText(R.string.no_data);
+            showDetailsIfTwoPanelsPresent(moviesData);
         }
     }
 
