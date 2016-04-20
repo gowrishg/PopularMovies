@@ -3,6 +3,7 @@ package in.kudu.popularmovies;
 
 import android.content.Context;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import com.google.gson.annotations.SerializedName;
 
 import in.kudu.popularmovies.db.MoviesDb;
 
-public class MovieData {
+public class MovieData implements Serializable {
 
     @SerializedName("poster_path")
     @Expose

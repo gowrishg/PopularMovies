@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.List;
 
 import butterknife.Bind;
@@ -57,6 +58,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
 
     private static final String TAG = PopularMoviesActivity.class.getSimpleName();
     MoviesGridViewAdapter moviesGridViewAdapter;
+    private String rememberedSortType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,18 +69,26 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         moviesGridViewAdapter = new MoviesGridViewAdapter(this);
         mMoviePostersGridView.setAdapter(moviesGridViewAdapter);
         mMoviePostersGridView.setEmptyView(emptyListItem);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
+        rememberedSortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
         mTwoPane = !(fragment == null);
 
-        String sortOrder = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
+        //! no need to requery the data is the savedtate is not null, as it could help to reduce the bandwidth from unnecessarily reloading the data
+        if (savedInstanceState == null) {
+            reloadData(rememberedSortType);
+        } else { // if there is a saved state, then restore it
+            MoviesData moviesData = (MoviesData) savedInstanceState.getSerializable("movies");
+            Log.i(TAG, "saved movies is null? " + (moviesData==null));
+            moviesGridViewAdapter.setMoviesData(moviesData);
+            moviesGridViewAdapter.notifyDataSetChanged();
+            mProgressBar.setVisibility(View.GONE);
+            emptyListItem.setText(R.string.no_data);
+            showDetailsIfTwoPanelsPresent(moviesData);
+        }
+    }
 
+    private void reloadData(String sortOrder) {
         //! check for Fav
-        if(sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
+        if (sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
             new LoadFav().execute();
         } else {
             Retrofit retrofit = new Retrofit.Builder()
@@ -91,6 +101,23 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             mProgressBar.setVisibility(View.VISIBLE);
             emptyListItem.setText(R.string.empty_string);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //! adding the check here, as the user could have changed the data and we shall decide if the data to be refreshed or not
+        String sortOrder = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
+        if (!rememberedSortType.equals(sortOrder)) {
+            reloadData(sortOrder);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("movies", (Serializable) moviesGridViewAdapter.getMoviesData());
     }
 
     private class LoadFav extends AsyncTask<Void, Void, MoviesData> {
@@ -249,6 +276,10 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
 
         public void setMoviesData(MoviesData moviesData) {
             this.mMoviesData = moviesData;
+        }
+
+        public MoviesData getMoviesData() {
+            return this.mMoviesData;
         }
 
         class ViewHolder {
