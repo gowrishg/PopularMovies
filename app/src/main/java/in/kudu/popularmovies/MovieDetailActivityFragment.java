@@ -95,10 +95,6 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
     }
 
     private void reInitUi() {
-        if(movieData == null) return;
-
-        Picasso.with(getContext()).load("http://image.tmdb.org/t/p/w185/" + movieData.posterPath).into(imageViewPoster);
-
         movieDetailLayout = new MovieDetailLayout(this.getActivity());
         movieDetailLayout.reInitUi(movieData);
 
@@ -108,16 +104,21 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
 
         reviewsViewer.addHeaderView(movieDetailLayout, null, false);
 
-        new CheckForFav().execute(movieData);
-
+        Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w185/" + movieData.posterPath).into(imageViewPoster);
+        new CheckForFav(getActivity()).execute(movieData);
         loadReviews();
     }
 
     class CheckForFav extends AsyncTask<MovieData, Void, Boolean> {
 
+        Context mContext;
+        CheckForFav(Context context) {
+            this.mContext = context;
+        }
+
         @Override
         protected Boolean doInBackground(MovieData... params) {
-            return params[0].isFav(getContext());
+            return params[0].isFav(mContext);
         }
 
         @Override
