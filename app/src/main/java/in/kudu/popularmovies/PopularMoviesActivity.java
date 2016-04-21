@@ -91,11 +91,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         if (sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
             new LoadFav().execute();
         } else {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(PopularMoviesApi.BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
+            PopularMoviesApi.PopularMoviesService popuplarMoviesService = PopularMoviesApi.getPopularMoviesServiceInstance();
             Call<MoviesData> result = popuplarMoviesService.movieList(sortOrder);
             result.enqueue(this);
             mProgressBar.setVisibility(View.VISIBLE);

@@ -1,5 +1,6 @@
 package in.kudu.popularmovies;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -109,6 +110,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         loadReviews();
     }
 
+
     class CheckForFav extends AsyncTask<MovieData, Void, Boolean> {
 
         Context mContext;
@@ -127,10 +129,6 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         }
     }
 
-    public void setMovieData(MovieData movieData) {
-        this.movieData = movieData;
-    }
-
     @OnClick(R.id.play_trailer_button)
     void playTrailer() {
         if (playTrailerButton.isSelected()) {
@@ -138,12 +136,8 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
             videosViewer.setVisibility(View.GONE);
         } else {
             playTrailerButton.setSelected(true);
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(PopularMoviesApi.BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
-                Call<VideosData> result = popuplarMoviesService.trailerList(movieData.id);
+            PopularMoviesApi.PopularMoviesService popularMoviesService = PopularMoviesApi.getPopularMoviesServiceInstance();
+            Call<VideosData> result = popularMoviesService.trailerList(movieData.id);
             result.enqueue(this);
             progressBar.setVisibility(View.VISIBLE);
             actionBar.setVisibility(View.GONE);
@@ -227,12 +221,8 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
     private void loadReviews() {
 
         reviewsViewer.removeHeaderView(headerView);
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(PopularMoviesApi.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        PopularMoviesApi.PopuplarMoviesService popuplarMoviesService = retrofit.create(PopularMoviesApi.PopuplarMoviesService.class);
-        Call<ReviewsData> reviews = popuplarMoviesService.review(movieData.id);
+        PopularMoviesApi.PopularMoviesService popularMoviesService = PopularMoviesApi.getPopularMoviesServiceInstance();
+        Call<ReviewsData> reviews = popularMoviesService.review(movieData.id);
         reviews.enqueue(new Callback<ReviewsData>() {
             @Override
             public void onResponse(Call<ReviewsData> call, Response<ReviewsData> response) {
