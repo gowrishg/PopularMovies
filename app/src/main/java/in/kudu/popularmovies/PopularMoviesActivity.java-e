@@ -79,7 +79,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         if (savedInstanceState == null) {
             reloadData(sortType);
         } else { // if there is a saved state, then restore it
-            MoviesData moviesData = (MoviesData) savedInstanceState.getSerializable("movies");
+            MoviesData moviesData = (MoviesData) savedInstanceState.getParcelable("movies");
             Log.i(TAG, "saved movies is null? " + (moviesData==null));
             moviesGridViewAdapter.setMoviesData(moviesData);
             moviesGridViewAdapter.notifyDataSetChanged();
@@ -117,7 +117,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("movies", (Serializable) moviesGridViewAdapter.getMoviesData());
+        outState.putParcelable("movies", moviesGridViewAdapter.getMoviesData());
     }
 
     private class LoadFav extends AsyncTask<Void, Void, MoviesData> {
@@ -156,7 +156,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             } else {
                 MovieDetailActivityFragment movieDetailActivityFragment = new MovieDetailActivityFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString("MOVIE_DATA", new Gson().toJson(movieData));
+                bundle.putParcelable("MOVIE_DATA", movieData);
                 movieDetailActivityFragment.setArguments(bundle);
                 fragManager.beginTransaction().replace(R.id.fragment, movieDetailActivityFragment, MOVIE_DETAILS_TAG).commit();
                 //movieDetailActivityFragment.setMovieData(movieData);
@@ -225,10 +225,8 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         if(mTwoPane) {
             showDetailsIfTwoPanelsPresent(movieData);
         } else {
-            Gson gson = new Gson();
-            String movieDataStr = gson.toJson(movieData);
             Intent intent = new Intent(this, MovieDetailActivity.class);
-            intent.putExtra("MOVIE_DATA", movieDataStr);
+            intent.putExtra("MOVIE_DATA", movieData);
             startActivity(intent);
         }
     }

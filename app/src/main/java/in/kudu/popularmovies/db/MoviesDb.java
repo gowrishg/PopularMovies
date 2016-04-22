@@ -8,6 +8,7 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
+import android.os.Parcel;
 
 import com.google.gson.Gson;
 
@@ -15,14 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.kudu.popularmovies.MovieData;
+import in.kudu.popularmovies.ParcelableUtil;
 
 /**
  * Created by gowrishg on 22/2/16.
  */
 public class MoviesDb extends SQLiteOpenHelper {
 
-    public static final String FAV_TABLE = "CREATE TABLE FAV (_id INTEGER PRIMARY KEY AUTOINCREMENT, MOVIE_ID INTEGER, MOVIE_DATA text, TIMESTAMP INTEGER);";
-    private static final String MOVIE_DB = "movies.db";
+    public static final String FAV_TABLE = "CREATE TABLE FAV (_id INTEGER PRIMARY KEY AUTOINCREMENT, MOVIE_ID INTEGER, MOVIE_DATA BLOB, TIMESTAMP INTEGER);";
+    private static final String MOVIE_DB = "movies.sqlite2";
     private static final int MOVIE_DB_VER = 1;
 
     public MoviesDb(Context context) {
@@ -51,7 +53,7 @@ public class MoviesDb extends SQLiteOpenHelper {
             ContentValues contentValues = new ContentValues();
             contentValues.put("MOVIE_ID", movieData.id);
             contentValues.put("TIMESTAMP", (int) (System.currentTimeMillis() / 1000));
-            contentValues.put("MOVIE_DATA", new Gson().toJson(movieData));
+            contentValues.put("MOVIE_DATA", ParcelableUtil.marshall(movieData));
             getWritableDatabase().insert("FAV", null, contentValues);
         }
     }
@@ -67,7 +69,8 @@ public class MoviesDb extends SQLiteOpenHelper {
         Cursor cursor = getReadableDatabase().query("FAV", new String[]{"MOVIE_DATA"}, null, null, null, null, "TIMESTAMP ASC");
         List<MovieData> movieDataList = new ArrayList<>(cursor.getCount());
         while (cursor.moveToNext()) {
-            MovieData movieData = new Gson().fromJson(cursor.getString(0), MovieData.class);
+            byte[] data = cursor.getBlob(0);
+            MovieData movieData = new MovieData(ParcelableUtil.unmarshall(data));
             movieDataList.add(movieData);
         }
         cursor.close();

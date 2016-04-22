@@ -88,9 +88,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         videosAdapter = new VideosAdapter(getActivity());
         videosViewer.setAdapter(videosAdapter);
 
-        String movieDataJson = getArguments().getString("MOVIE_DATA");
-        Gson gson = new Gson();
-        movieData = gson.fromJson(movieDataJson, MovieData.class);
+        movieData = getArguments().getParcelable("MOVIE_DATA");
 
         reInitUi();
     }
