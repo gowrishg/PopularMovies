@@ -69,12 +69,15 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         moviesGridViewAdapter = new MoviesGridViewAdapter(this);
         mMoviePostersGridView.setAdapter(moviesGridViewAdapter);
         mMoviePostersGridView.setEmptyView(emptyListItem);
-        rememberedSortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
+
+        String sortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
+        rememberedSortType = sortType;
+
         mTwoPane = !(fragment == null);
 
         //! no need to requery the data is the savedtate is not null, as it could help to reduce the bandwidth from unnecessarily reloading the data
         if (savedInstanceState == null) {
-            reloadData(rememberedSortType);
+            reloadData(sortType);
         } else { // if there is a saved state, then restore it
             MoviesData moviesData = (MoviesData) savedInstanceState.getSerializable("movies");
             Log.i(TAG, "saved movies is null? " + (moviesData==null));
@@ -87,6 +90,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     }
 
     private void reloadData(String sortOrder) {
+        rememberedSortType=sortOrder;
         //! check for Fav
         if (sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
             new LoadFav().execute();
