@@ -53,7 +53,7 @@ class ReviewsAdapter extends BaseAdapter {
         }
 
         ReviewData reviewData = mReviewsData.results.get(position);
-        String review = String.format(mContext.getString(R.string.review_template), new String[]{reviewData.author});
+        String review = String.format(mContext.getString(R.string.review_template), reviewData.author);
         SpannableString span1 = new SpannableString(review);
         span1.setSpan(new StyleSpan(android.graphics.Typeface.BOLD_ITALIC), 0, span1.length(), 0);
         SpannableString span2 = new SpannableString(reviewData.content);

@@ -248,7 +248,7 @@ public class MovieDetailActivityFragment extends Fragment implements Callback<Vi
         alertDialog = new AlertDialog.Builder(this.getActivity());
         alertDialog.setTitle(R.string.review_title);
 
-        String review = String.format(getString(R.string.review_template), new String[]{reviewData.author});
+        String review = String.format(getString(R.string.review_template), reviewData.author);
         SpannableString span1 = new SpannableString(review);
         span1.setSpan(new StyleSpan(android.graphics.Typeface.BOLD_ITALIC), 0, span1.length(), 0);
         SpannableString span2 = new SpannableString(reviewData.content);
