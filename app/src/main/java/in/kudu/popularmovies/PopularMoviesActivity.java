@@ -177,7 +177,10 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         if(mTwoPane) {
             FragmentManager fragManager = getSupportFragmentManager();
             if(movieData == null) {
-                fragManager.popBackStack();
+
+                if(fragManager.getBackStackEntryCount() > 0)
+                    fragManager.popBackStack();
+
                 Fragment fragment = fragManager.findFragmentByTag(MOVIE_DETAILS_TAG);
                 if(fragment != null) {
                     fragManager.beginTransaction().remove(fragment).commit();
@@ -198,7 +201,10 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         if(mTwoPane) {
             FragmentManager fragManager = getSupportFragmentManager();
             if(moviesData == null || moviesData.results == null || moviesData.results.size() == 0) {
-                fragManager.popBackStack();
+
+                if(fragManager.getBackStackEntryCount() > 0)
+                    fragManager.popBackStack();
+
                 Fragment fragment = fragManager.findFragmentByTag(MOVIE_DETAILS_TAG);
                 if(fragment != null) {
                     fragManager.beginTransaction().remove(fragment).commit();
