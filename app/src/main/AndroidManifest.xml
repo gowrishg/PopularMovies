@@ -28,6 +28,11 @@
             android:name="in.kudu.popularmovies.MovieDetailActivity"
             android:label="@string/title_activity_movie_detail"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+
+
+        <provider
+            android:name="in.kudu.popularmovies.MoviesProvider"
+            android:authorities="in.kudu.udacity.provider" />
     </application>
 
 </manifest>

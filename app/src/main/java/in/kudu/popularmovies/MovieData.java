@@ -1,7 +1,9 @@
 
 package in.kudu.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -68,15 +70,28 @@ public class MovieData implements Parcelable {
     }
 
     public void addToFav(Context context) {
+        /*
         MoviesDb moviesDb = new MoviesDb(context);
         moviesDb.addToFav(this);
+        */
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MoviesDb.COLUMN_NAME_MOVIE_ID, id);
+        contentValues.put(MoviesDb.COLUMN_NAME_TIMESTAMP, (int) (System.currentTimeMillis() / 1000));
+        contentValues.put(MoviesDb.COLUMN_NAME_MOVIE_DATA, ParcelableUtil.marshall(this));
+        Uri uri = context.getContentResolver().insert(Uri.parse(MoviesProvider.CONTENT_URI + "/fav_movies"), contentValues);
+
         isFav = true;
     }
 
 
     public void removeFromFav(Context context) {
+        /*
         MoviesDb moviesDb = new MoviesDb(context);
         moviesDb.deleteFav(this);
+        */
+        context.getContentResolver().delete(Uri.parse(MoviesProvider.CONTENT_URI + "/fav_movies/" + id), MoviesDb.COLUMN_NAME_MOVIE_ID + "=?", new String[]{String.valueOf(id)});
+
         isFav = false;
     }
 
