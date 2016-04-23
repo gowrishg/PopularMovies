@@ -2,8 +2,12 @@ package in.kudu.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.graphics.Movie;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -28,6 +32,7 @@ import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -70,14 +75,12 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         mMoviePostersGridView.setAdapter(moviesGridViewAdapter);
         mMoviePostersGridView.setEmptyView(emptyListItem);
 
-        String sortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
-        rememberedSortType = sortType;
-
+        rememberedSortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
         mTwoPane = !(fragment == null);
 
         //! no need to requery the data is the savedtate is not null, as it could help to reduce the bandwidth from unnecessarily reloading the data
         if (savedInstanceState == null) {
-            reloadData(sortType);
+            reloadData(rememberedSortType);
         } else { // if there is a saved state, then restore it
             MoviesData moviesData = (MoviesData) savedInstanceState.getParcelable("movies");
             Log.i(TAG, "saved movies is null? " + (moviesData==null));
@@ -89,8 +92,11 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         }
     }
 
+    /**
+     * Reload all based on the sort order
+     * @param sortOrder
+     */
     private void reloadData(String sortOrder) {
-        rememberedSortType=sortOrder;
         //! check for Fav
         if (sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
             new LoadFav().execute();
@@ -109,9 +115,25 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
 
         //! adding the check here, as the user could have changed the data and we shall decide if the data to be refreshed or not
         String sortOrder = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
-        if (!rememberedSortType.equals(sortOrder)) {
-            reloadData(sortOrder);
+        if (sortOrder.equalsIgnoreCase(getResources().getStringArray(R.array.pref_sort_order_list_values)[2])) {
+            new LoadFav().execute();
+        } else {
+            if(!rememberedSortType.equals(sortOrder)) {
+                PopularMoviesApi.PopularMoviesService popuplarMoviesService = PopularMoviesApi.getPopularMoviesServiceInstance();
+                Call<MoviesData> result = popuplarMoviesService.movieList(sortOrder);
+                result.enqueue(this);
+                mProgressBar.setVisibility(View.VISIBLE);
+                emptyListItem.setText(R.string.empty_string);
+            }
         }
+        rememberedSortType=sortOrder;
+
+        reloadData(sortOrder);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
