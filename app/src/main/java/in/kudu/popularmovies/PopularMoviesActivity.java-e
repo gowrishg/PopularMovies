@@ -75,14 +75,16 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         mMoviePostersGridView.setAdapter(moviesGridViewAdapter);
         mMoviePostersGridView.setEmptyView(emptyListItem);
 
-        rememberedSortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
+        String sortType = PreferenceManager.getDefaultSharedPreferences(this).getString("sort_order_list", getString(R.string.pref_sort_order_default));
         mTwoPane = !(fragment == null);
 
         //! no need to requery the data is the savedtate is not null, as it could help to reduce the bandwidth from unnecessarily reloading the data
         if (savedInstanceState == null) {
-            reloadData(rememberedSortType);
+            rememberedSortType = sortType;
+            reloadData(sortType);
         } else { // if there is a saved state, then restore it
             MoviesData moviesData = (MoviesData) savedInstanceState.getParcelable("movies");
+            rememberedSortType = savedInstanceState.getString("sort_type");
             Log.i(TAG, "saved movies is null? " + (moviesData==null));
             moviesGridViewAdapter.setMoviesData(moviesData);
             moviesGridViewAdapter.notifyDataSetChanged();
@@ -138,6 +140,7 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable("movies", moviesGridViewAdapter.getMoviesData());
+        outState.putString("sort_type", rememberedSortType);
     }
 
     private class LoadFav extends AsyncTask<Void, Void, MoviesData> {
