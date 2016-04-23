@@ -20,6 +20,7 @@ public class MoviesData implements Parcelable {
     @Expose
     public List<MovieData> results = new ArrayList<MovieData>();
 
+    public MoviesData() { }
 
     @Override
     public int describeContents() {
@@ -30,9 +31,6 @@ public class MoviesData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeValue(this.page);
         dest.writeTypedList(results);
-    }
-
-    public MoviesData() {
     }
 
     protected MoviesData(Parcel in) {

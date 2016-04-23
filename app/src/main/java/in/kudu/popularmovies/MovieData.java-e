@@ -104,8 +104,7 @@ public class MovieData implements Parcelable {
         dest.writeByte(isFav ? (byte) 1 : (byte) 0);
     }
 
-    public MovieData() {
-    }
+    public MovieData() { }
 
     public MovieData(Parcel in) {
         this.posterPath = in.readString();
