@@ -202,13 +202,11 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
 
     @Override
     public void onResponse(Call<MoviesData> call, Response<MoviesData> response) {
-        Log.d(TAG, "Response Size: " + response.body().results.size());
-        Log.d(TAG, "Response: " + response.raw().toString());
+        Log.d(TAG, "Response: " + call.request().url().toString());
         moviesGridViewAdapter.setMoviesData(response.body());
         moviesGridViewAdapter.notifyDataSetChanged();
-        mProgressBar.setVisibility(View.GONE);
         emptyListItem.setText(R.string.no_data);
-
+        mProgressBar.setVisibility(View.GONE);
         showDetailsIfTwoPanelsPresent(response.body());
     }
 
