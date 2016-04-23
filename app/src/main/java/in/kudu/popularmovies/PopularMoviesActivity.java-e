@@ -127,8 +127,6 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             }
         }
         rememberedSortType=sortOrder;
-
-        reloadData(sortOrder);
     }
 
     @Override
