@@ -133,7 +133,12 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
         protected MoviesData doInBackground(Void... params) {
             MoviesDb moviesDb = new MoviesDb(getBaseContext());
             MoviesData moviesData = new MoviesData();
-            moviesData.results = moviesDb.getFavMovies();
+            Cursor cursor = getContentResolver().query(Uri.parse(MoviesProvider.CONTENT_URI + "/fav_movies"), new String[]{MoviesDb.COLUMN_NAME_MOVIE_DATA}, null, null, MoviesDb.COLUMN_NAME_TIMESTAMP + " ASC");
+            while (cursor.moveToNext()) {
+                byte[] data = cursor.getBlob(0);
+                MovieData movieData = new MovieData(ParcelableUtil.unmarshall(data));
+                moviesData.results.add(movieData);
+            }
             moviesData.page = 0;
             return moviesData;
         }
