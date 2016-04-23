@@ -153,6 +153,10 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             FragmentManager fragManager = getSupportFragmentManager();
             if(movieData == null) {
                 fragManager.popBackStack();
+                Fragment fragment = fragManager.findFragmentByTag(MOVIE_DETAILS_TAG);
+                if(fragment != null) {
+                    fragManager.beginTransaction().remove(fragment).commit();
+                }
             } else {
                 MovieDetailActivityFragment movieDetailActivityFragment = new MovieDetailActivityFragment();
                 Bundle bundle = new Bundle();
@@ -170,6 +174,10 @@ public class PopularMoviesActivity extends AppCompatActivity implements Callback
             FragmentManager fragManager = getSupportFragmentManager();
             if(moviesData == null || moviesData.results == null || moviesData.results.size() == 0) {
                 fragManager.popBackStack();
+                Fragment fragment = fragManager.findFragmentByTag(MOVIE_DETAILS_TAG);
+                if(fragment != null) {
+                    fragManager.beginTransaction().remove(fragment).commit();
+                }
             } else {
                 showDetailsIfTwoPanelsPresent(moviesData.results.get(0));
             }
